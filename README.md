@@ -1,7 +1,5 @@
 # 🎓 Classplus Auto Uploader Bot
 
-Natking-Auto-Uploader की तरह काम करता है — लेकिन **Appx की जगह Classplus** platform का।
-
 Automatically downloads and uploads Classplus course content (videos, PDFs, YouTube links) to Telegram groups with daily scheduling and smart duplicate prevention.
 
 ---
