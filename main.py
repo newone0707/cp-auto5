@@ -27,6 +27,8 @@ def run_flask():
     flask_app.run(host="0.0.0.0", port=port, use_reloader=False)
 
 if __name__ == "__main__":
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     bot = Client(
         "ClassplusAutoBot",
         bot_token=Config.BOT_TOKEN,
@@ -50,5 +52,5 @@ if __name__ == "__main__":
     t = threading.Thread(target=run_flask, daemon=True)
     t.start()
 
-    asyncio.get_event_loop().run_until_complete(main())
+    loop.run_until_complete(main())
     LOGGER.info("<--- Bot Stopped --->")
