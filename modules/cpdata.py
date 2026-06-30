@@ -262,7 +262,13 @@ async def verify_token(token):
         "x-access-token": token, "user-agent": "Mobile-Android",
         "api-version": "29", "device-id": DEVICE_ID, "region": "IN",
     }
-    for url in [f"{CP_API}/v2/batches/details?limit=1&offset=0", f"{CP_API}/v2/profile"]:
+    endpoints = [
+        f"{CP_API}/v2/courses?limit=1&offset=0",
+        f"{CP_API}/v2/student/courses?limit=1&offset=0",
+        f"{CP_API}/v2/course/list?limit=1&offset=0",
+        f"{CP_API}/v2/batches/details?limit=1&offset=0",
+    ]
+    for url in endpoints:
         try:
             r = await scraper.get(url, headers=headers)
             if r.status_code == 200:
