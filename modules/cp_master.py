@@ -145,17 +145,17 @@ async def otp_login(org_code_mobile, editable, bot, m):
         verify_resp = await scraper.post(f"{CP_API}/v2/users/verify", json=verify_payload, headers=headers)
         LOGGER.info(f"verify_resp status={verify_resp.status_code}")
 
-        if verify_resp.status_code == 200:
+        if verify_resp.status_code in (200, 409, 403, 400):
             verify_data = verify_resp.json()
             LOGGER.info(f"verify_data={verify_data}")
-            if verify_data.get("status") == "success":
-                # FIX: token can be nested under data.token or data.data.token
+            if verify_data.get("status") == "success" or verify_resp.status_code == 200:
                 vdata = verify_data.get("data") or {}
                 token = vdata.get("token") or (vdata.get("data") or {}).get("token", "")
                 if token:
                     return {"success": True, "token": token, "message": "Login Successful"}
+            
             # Return actual server message for debugging
-            err_msg = verify_data.get("message") or verify_data.get("msg") or "OTP verification failed"
+            err_msg = verify_data.get("message") or verify_data.get("msg") or f"OTP verification failed (HTTP {verify_resp.status_code})"
             return {"success": False, "message": err_msg}
         return {"success": False, "message": f"Verification failed: {verify_resp.status_code}"}
 
