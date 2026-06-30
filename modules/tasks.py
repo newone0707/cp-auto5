@@ -187,6 +187,8 @@ async def process_batch_upload(bot, course_id, all_data):
                     cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
                 )
                 stdout, stderr = await proc.communicate()
+                if stderr:
+                    LOGGER.warning(f"yt-dlp stderr: {stderr.decode('utf-8', errors='ignore').strip()}")
                 for ext in [".mkv", ".mp4", ".webm", ".ts"]:
                     c = output_path.replace(".mkv", ext)
                     if os.path.exists(c) and os.path.getsize(c) > 0:
