@@ -2,7 +2,7 @@ import os
 
 class Config(object):
     BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
-    DB_NAME = os.environ.get("DB_NAME", "classplus_bot")
+    DB_NAME = os.environ.get("DB_NAME", "classplus_bot").strip().replace(" ", "")
     API_ID = os.environ.get("API_ID", "YOUR_API_ID")
     API_HASH = os.environ.get("API_HASH", "YOUR_API_HASH")
     DB_URL = os.environ.get("DB_URL", "mongodb+srv://amanraj8241245_db_user:l5ZdFFk0yuQckD5M@cluster0.4uxpbyq.mongodb.net/?appName=Cluster0")
