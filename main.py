@@ -4,8 +4,12 @@ asyncio.set_event_loop(loop)
 
 import pyromod.listen
 from pyromod.types.identifier import Identifier
-if not hasattr(Identifier, "__annotations__"):
-    Identifier.__annotations__ = {}
+_old_init = Identifier.__init__
+def _new_init(self, *args, **kwargs):
+    _old_init(self, *args, **kwargs)
+    self.__annotations__ = getattr(self.__class__, "__annotations__", {})
+Identifier.__init__ = _new_init
+
 
 from config import Config
 from pyrogram import Client, idle
