@@ -93,3 +93,15 @@ async def addbatch_cmd(client, m):
     if not Config.is_admin(m.from_user.id):
         return await m.reply_text("🔒 Admin only command.")
     await m.reply_text(msg.APP, reply_markup=buttom.login_keyboard())
+
+@bot.on_message(filters.command("clearqueue") & filters.private)
+async def clearqueue_handler(_, m):
+    if not Config.is_admin(m.from_user.id):
+        return await m.reply_text("🔒 Admin only")
+    try:
+        from master.database import db_instance
+        await db_instance.batch_status.delete_many({"status": {"$ne": "completed"}})
+        await m.reply_text("✅ All stuck queues have been cleared! Restarting cleanly...")
+        os.execl(sys.executable, sys.executable, *sys.argv)
+    except Exception as e:
+        await m.reply_text(f"⚠️ Error: {e}")
