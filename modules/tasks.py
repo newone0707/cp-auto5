@@ -145,10 +145,9 @@ async def process_batch_upload(bot, course_id, all_data):
                     # Last resort: yt-dlp with headers
                     LOGGER.warning(f"httpx HLS failed, trying yt-dlp: {name}")
                     hdr_args = (
-                        f'--add-header "x-access-token:{used_token}" '
-                        f'--add-header "user-agent:Mobile-Android" '
-                        f'--add-header "Api-Version:29" '
-                        f'--add-header "X-CDN-Tag:empty" '
+                        f'--add-header "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" '
+                        f'--add-header "Referer:https://web.classplusapp.com/" '
+                        f'--add-header "Origin:https://web.classplusapp.com" '
                     )
                     cmd = (
                         f'yt-dlp -o "{output_path}" --no-check-certificate '
