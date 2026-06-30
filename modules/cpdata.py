@@ -258,9 +258,14 @@ async def _get_drm_keys(mpd_url, lic_url, token):
 
 
 async def verify_token(token):
-    headers = {
+    mobile_headers = {
         "x-access-token": token, "user-agent": "Mobile-Android",
         "api-version": "29", "device-id": DEVICE_ID, "region": "IN",
+    }
+    web_headers = {
+        "x-access-token": token,
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "api-version": "50", "region": "IN", "device-id": "web-browser",
     }
     endpoints = [
         f"{CP_API}/v2/courses?limit=1&offset=0",
@@ -269,12 +274,13 @@ async def verify_token(token):
         f"{CP_API}/v2/batches/details?limit=1&offset=0",
     ]
     for url in endpoints:
-        try:
-            r = await scraper.get(url, headers=headers)
-            if r.status_code == 200:
-                return True
-        except Exception:
-            pass
+        for hdrs in [mobile_headers, web_headers]:
+            try:
+                r = await scraper.get(url, headers=hdrs)
+                if r.status_code == 200:
+                    return True
+            except Exception:
+                pass
     return False
 
 
@@ -295,37 +301,44 @@ def _normalize_batch(item):
     return {**item, "id": b_id, "name": b_name}
 
 
-async def _try_endpoint(headers, url, params, label):
-    try:
-        r = await scraper.get(url, params=params, headers=headers)
-        if r.status_code != 200:
-            return []
-        data = r.json()
-        inner = data.get("data", {}) or {}
-        for key in ("list","courses","batches","batchList","courseList",
-                    "enrolledCourses","items","result","totalBatches","data"):
-            val = inner.get(key)
-            if isinstance(val, list) and val:
-                return [_normalize_batch(x) for x in val]
-        for v in inner.values():
-            if isinstance(v, list) and v:
-                return [_normalize_batch(x) for x in v]
-        return []
-    except Exception as e:
-        LOGGER.error(f"[{label}] error: {e}")
-        return []
+async def _try_endpoint(url, params, label, token):
+    mobile_headers = {
+        "x-access-token": token, "user-agent": "Mobile-Android",
+        "api-version": "29", "device-id": DEVICE_ID, "region": "IN",
+    }
+    web_headers = {
+        "x-access-token": token,
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "api-version": "50", "region": "IN", "device-id": "web-browser",
+    }
+    for hdrs in [mobile_headers, web_headers]:
+        try:
+            r = await scraper.get(url, params=params, headers=hdrs)
+            if r.status_code == 200:
+                data = r.json()
+                inner = data.get("data", {}) or {}
+                for key in ("list","courses","batches","batchList","courseList",
+                            "enrolledCourses","items","result","totalBatches","data"):
+                    val = inner.get(key)
+                    if isinstance(val, list) and val:
+                        return [_normalize_batch(x) for x in val]
+                for v in inner.values():
+                    if isinstance(v, list) and v:
+                        return [_normalize_batch(x) for x in v]
+        except Exception as e:
+            LOGGER.error(f"[{label}] error: {e}")
+            pass
+    return []
 
 
 async def get_batch_list(token):
-    headers = {"x-access-token": token, "user-agent": "Mobile-Android",
-               "api-version": "29", "device-id": DEVICE_ID, "region": "IN"}
     for url, params, label in [
         (f"{CP_API}/v2/batches/details", {"limit":"50","offset":"0","sortBy":"createdAt"}, "batches"),
         (f"{CP_API}/v2/courses",          {"limit":"50","offset":"0"}, "courses"),
         (f"{CP_API}/v2/student/courses",  {"limit":"50","offset":"0"}, "student-courses"),
         (f"{CP_API}/v2/course/list",      {"limit":"50","offset":"0"}, "course-list"),
     ]:
-        result = await _try_endpoint(headers, url, params, label)
+        result = await _try_endpoint(url, params, label, token)
         if result:
             return result
     return []
@@ -335,15 +348,21 @@ async def fetch_folder_content(batch_id, folder_id, token, subject_name, topic_n
     if depth > 5:
         return []
     all_items = []
-    headers = {"x-access-token": token, "user-agent": "Mobile-Android",
+    mobile_headers = {"x-access-token": token, "user-agent": "Mobile-Android",
                "api-version": "29", "device-id": DEVICE_ID, "region": "IN"}
+    web_headers = {"x-access-token": token, "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+               "api-version": "50", "device-id": "web-browser", "region": "IN"}
     try:
         async with semaphore:
             params = {"courseId": str(batch_id)}
             if folder_id:
                 params["folderId"] = str(folder_id)
-            r = await scraper.get(f"{CP_API}/v2/course/content/get", params=params, headers=headers)
-        if r.status_code != 200:
+            r = None
+            for hdrs in [mobile_headers, web_headers]:
+                r = await scraper.get(f"{CP_API}/v2/course/content/get", params=params, headers=hdrs)
+                if r.status_code == 200:
+                    break
+        if not r or r.status_code != 200:
             return []
         data = (r.json().get("data") or {}).get("courseContent") or []
         for item in data:
@@ -374,12 +393,18 @@ async def collect_data(batch_id, token):
     LOGGER.info(f"Collecting data for batch: {batch_id}")
     all_items = []
     try:
-        headers = {"x-access-token": token, "user-agent": "Mobile-Android",
+        mobile_headers = {"x-access-token": token, "user-agent": "Mobile-Android",
                    "api-version": "29", "device-id": DEVICE_ID, "region": "IN"}
+        web_headers = {"x-access-token": token, "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                   "api-version": "50", "device-id": "web-browser", "region": "IN"}
         async with semaphore:
-            r = await scraper.get(f"{CP_API}/v2/course/content/get",
-                                  params={"courseId": str(batch_id)}, headers=headers)
-        if r.status_code != 200:
+            r = None
+            for hdrs in [mobile_headers, web_headers]:
+                r = await scraper.get(f"{CP_API}/v2/course/content/get",
+                                      params={"courseId": str(batch_id)}, headers=hdrs)
+                if r.status_code == 200:
+                    break
+        if not r or r.status_code != 200:
             return []
         top_folders = (r.json().get("data") or {}).get("courseContent") or []
         LOGGER.info(f"Found {len(top_folders)} top-level items")
