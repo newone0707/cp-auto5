@@ -259,13 +259,25 @@ async def _get_drm_keys(mpd_url, lic_url, token):
 
 async def verify_token(token):
     mobile_headers = {
-        "x-access-token": token, "user-agent": "Mobile-Android",
-        "api-version": "29", "device-id": DEVICE_ID, "region": "IN",
+        "x-access-token": token,
+        "user-agent": "Mobile-Android",
+        "api-version": "35",
+        "app-version": "1.4.73.2",
+        "device-id": DEVICE_ID,
+        "device-details": "Xiaomi_Redmi 7_SDK-32",
+        "region": "IN",
+        "accept-encoding": "gzip",
+        "accept": "application/json, text/plain, */*"
     }
     web_headers = {
         "x-access-token": token,
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        "api-version": "50", "region": "IN", "device-id": "web-browser",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "api-version": "50",
+        "device-id": "web-browser",
+        "region": "IN",
+        "origin": "https://web.classplusapp.com",
+        "referer": "https://web.classplusapp.com/",
+        "accept": "application/json, text/plain, */*"
     }
     endpoints = [
         f"{CP_API}/v2/courses?limit=1&offset=0",
@@ -303,13 +315,25 @@ def _normalize_batch(item):
 
 async def _try_endpoint(url, params, label, token):
     mobile_headers = {
-        "x-access-token": token, "user-agent": "Mobile-Android",
-        "api-version": "29", "device-id": DEVICE_ID, "region": "IN",
+        "x-access-token": token,
+        "user-agent": "Mobile-Android",
+        "api-version": "35",
+        "app-version": "1.4.73.2",
+        "device-id": DEVICE_ID,
+        "device-details": "Xiaomi_Redmi 7_SDK-32",
+        "region": "IN",
+        "accept-encoding": "gzip",
+        "accept": "application/json, text/plain, */*"
     }
     web_headers = {
         "x-access-token": token,
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        "api-version": "50", "region": "IN", "device-id": "web-browser",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "api-version": "50",
+        "device-id": "web-browser",
+        "region": "IN",
+        "origin": "https://web.classplusapp.com",
+        "referer": "https://web.classplusapp.com/",
+        "accept": "application/json, text/plain, */*"
     }
     for hdrs in [mobile_headers, web_headers]:
         try:
@@ -348,10 +372,27 @@ async def fetch_folder_content(batch_id, folder_id, token, subject_name, topic_n
     if depth > 5:
         return []
     all_items = []
-    mobile_headers = {"x-access-token": token, "user-agent": "Mobile-Android",
-               "api-version": "29", "device-id": DEVICE_ID, "region": "IN"}
-    web_headers = {"x-access-token": token, "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-               "api-version": "50", "device-id": "web-browser", "region": "IN"}
+    mobile_headers = {
+        "x-access-token": token,
+        "user-agent": "Mobile-Android",
+        "api-version": "35",
+        "app-version": "1.4.73.2",
+        "device-id": DEVICE_ID,
+        "device-details": "Xiaomi_Redmi 7_SDK-32",
+        "region": "IN",
+        "accept-encoding": "gzip",
+        "accept": "application/json, text/plain, */*"
+    }
+    web_headers = {
+        "x-access-token": token,
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "api-version": "50",
+        "device-id": "web-browser",
+        "region": "IN",
+        "origin": "https://web.classplusapp.com",
+        "referer": "https://web.classplusapp.com/",
+        "accept": "application/json, text/plain, */*"
+    }
     try:
         async with semaphore:
             params = {"courseId": str(batch_id)}
@@ -393,10 +434,27 @@ async def collect_data(batch_id, token):
     LOGGER.info(f"Collecting data for batch: {batch_id}")
     all_items = []
     try:
-        mobile_headers = {"x-access-token": token, "user-agent": "Mobile-Android",
-                   "api-version": "29", "device-id": DEVICE_ID, "region": "IN"}
-        web_headers = {"x-access-token": token, "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                   "api-version": "50", "device-id": "web-browser", "region": "IN"}
+        mobile_headers = {
+        "x-access-token": token,
+        "user-agent": "Mobile-Android",
+        "api-version": "35",
+        "app-version": "1.4.73.2",
+        "device-id": DEVICE_ID,
+        "device-details": "Xiaomi_Redmi 7_SDK-32",
+        "region": "IN",
+        "accept-encoding": "gzip",
+        "accept": "application/json, text/plain, */*"
+    }
+        web_headers = {
+        "x-access-token": token,
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
+        "api-version": "50",
+        "device-id": "web-browser",
+        "region": "IN",
+        "origin": "https://web.classplusapp.com",
+        "referer": "https://web.classplusapp.com/",
+        "accept": "application/json, text/plain, */*"
+    }
         async with semaphore:
             r = None
             for hdrs in [mobile_headers, web_headers]:
