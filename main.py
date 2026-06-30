@@ -1,7 +1,10 @@
+import asyncio
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+
 import pyromod.listen
 from config import Config
 from pyrogram import Client, idle
-import asyncio
 from logger import LOGGER
 from modules.retasks import recover_incomplete_batches
 from modules.scheduler import start_daily_schedulers
@@ -27,8 +30,6 @@ def run_flask():
     flask_app.run(host="0.0.0.0", port=port, use_reloader=False)
 
 if __name__ == "__main__":
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
     bot = Client(
         "ClassplusAutoBot",
         bot_token=Config.BOT_TOKEN,
