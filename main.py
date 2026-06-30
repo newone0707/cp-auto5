@@ -3,6 +3,10 @@ loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
 import pyromod.listen
+from pyromod.types.identifier import Identifier
+if not hasattr(Identifier, "__annotations__"):
+    Identifier.__annotations__ = {}
+
 from config import Config
 from pyrogram import Client, idle
 from logger import LOGGER
